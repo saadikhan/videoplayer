@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Set your OpenAI API key securely (avoid hardcoding in production)
-openai.api_key = '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'  # Replace with your actual OpenAI API key
+openai.api_key = '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'  # Replace with your actual OpenAI API key
 
 @app.route('/')
 def index():

@@ -3,90 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Video Player with AI Q&A</title>
+    <title>Interactive Video Player</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        #video-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            margin: auto;
-        }
-
-        iframe {
-            width: 100%;
-            height: 450px;
-        }
-
-        #chat-box {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 10px;
-            border-radius: 5px;
-            display: none; /* Hidden initially */
-        }
-
-        #chat-box input {
-            width: 250px;
-            padding: 5px;
-            margin-top: 10px;
-        }
-
-        #chat-box button {
-            margin-top: 5px;
-            padding: 5px;
-            background-color: #007bff;
+        #search-bar {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
             color: white;
-            border: none;
-            border-radius: 5px;
+            border-radius: 10px;
+            z-index: 9999;
+        }
+        #search-input {
+            width: 300px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #search-btn {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div id="video-container">
-        <!-- Embed YouTube video -->
-        <iframe id="youtube-video" src="https://www.youtube.com/embed/hxMNYkLN7tI?autoplay=1&rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-        
-        <!-- Chatbox for search -->
-        <div id="chat-box">
-            <label for="user-query">Ask a Question:</label>
-            <input type="text" id="user-query" placeholder="Type your question..." />
-            <button onclick="askQuestion()">Search</button>
-            <div id="answer"></div>
-        </div>
+    <!-- YouTube Video Embed -->
+    <div id="player"></div>
+
+    <!-- Search Bar -->
+    <div id="search-bar">
+        <input type="text" id="search-input" placeholder="Ask something...">
+        <button id="search-btn">Search</button>
     </div>
 
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        // Detect when video is paused to show the chat box
-        const iframe = document.getElementById("youtube-video");
-        const chatBox = document.getElementById("chat-box");
-        
-        // Function to detect pause and show chatbox
-        iframe.contentWindow.postMessage('{"event":"command","func":"addEventListener","args":["onStateChange","onPlayerStateChange"]}', '*');
+        let player;
 
-        window.onPlayerStateChange = function(event) {
-            if (event.data === 2) {  // Video paused (YouTube API state)
-                chatBox.style.display = "block"; // Show chatbox
-            }
-        };
+        // This function is called by the YouTube Iframe API once it's ready
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '360',
+                width: '640',
+                videoId: 'hxMNYkLN7tI',  // Replace with your desired YouTube video ID
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
 
-        // Function to ask questions and simulate AI response
-        function askQuestion() {
-            const userQuery = document.getElementById("user-query").value;
-            if (userQuery.trim() !== "") {
-                document.getElementById("answer").innerHTML = `Searching for: <strong>${userQuery}</strong>...<br>Answer: <em>This is a simulated AI response for "${userQuery}".</em>`;
-            } else {
-                document.getElementById("answer").innerHTML = "<em>Please type a question!</em>";
+        // This function is triggered whenever the video state changes (playing, paused, etc.)
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PAUSED) {
+                // Show the search bar when the video is paused
+                document.getElementById('search-bar').style.display = 'block';
+            } else if (event.data == YT.PlayerState.PLAYING) {
+                // Hide the search bar when the video is playing
+                document.getElementById('search-bar').style.display = 'none';
             }
         }
+
+        // Initialize YouTube player on page load
+        window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
     </script>
 </body>
 </html>

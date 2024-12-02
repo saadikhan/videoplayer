@@ -42,6 +42,7 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         let player;
+        let searchBar = document.getElementById('search-bar');
 
         // This function is called by the YouTube Iframe API once it's ready
         function onYouTubeIframeAPIReady() {
@@ -59,15 +60,21 @@
         function onPlayerStateChange(event) {
             if (event.data == YT.PlayerState.PAUSED) {
                 // Show the search bar when the video is paused
-                document.getElementById('search-bar').style.display = 'block';
+                searchBar.style.display = 'block';
             } else if (event.data == YT.PlayerState.PLAYING) {
                 // Hide the search bar when the video is playing
-                document.getElementById('search-bar').style.display = 'none';
+                searchBar.style.display = 'none';
             }
         }
 
         // Initialize YouTube player on page load
         window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+        // Search button event
+        document.getElementById('search-btn').addEventListener('click', function() {
+            const query = document.getElementById('search-input').value;
+            alert('You searched for: ' + query);  // Placeholder for actual search logic
+        });
     </script>
 </body>
 </html>

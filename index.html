@@ -3,34 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Video Player</title>
+    <title>Interactive YouTube Video Player</title>
     <style>
         #video-container {
             position: relative;
+            width: 100%;
+            max-width: 640px; /* Adjust based on your preference */
+            margin: auto;
         }
 
         #avatar {
-            position: absolute;
-            top: 10px;  /* Adjusted to fit within the screen */
-            left: 10px; /* Ensured avatar stays within bounds */
+            position: fixed;
+            top: 10px;
+            left: 10px;
             width: 100px;
-            height: auto;
-            display: none; /* Hide avatar initially */
+            display: none; /* Hidden initially */
         }
 
         #question-box {
-            position: absolute;
-            top: 120px; /* Move the question box down */
+            position: fixed;
+            top: 100px; /* Move the question box down */
             left: 10px;
             padding: 8px;
             background-color: white;
             border: 1px solid #ccc;
             width: 250px;
-            display: none; /* Hide question box initially */
+            display: none; /* Hidden initially */
         }
 
         #question {
-            width: 100%; /* Make the input field fill the question box */
+            width: 100%;
         }
 
         #response {
@@ -40,7 +42,7 @@
 </head>
 <body>
     <div id="video-container">
-        <div id="player"></div>
+        <div id="player"></div> <!-- YouTube Video player will be embedded here -->
         <img src="avatar.png" alt="Avatar" id="avatar">
         <div id="question-box">
             <input type="text" id="question" placeholder="Ask a question..." />
@@ -49,44 +51,42 @@
         </div>
     </div>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        var player;
         var avatar = document.getElementById('avatar');
         var questionBox = document.getElementById('question-box');
         var responseBox = document.getElementById('response');
+        
+        // Load the YouTube Iframe API
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        // Initialize the YouTube player
+        // Create the YouTube player once the API is ready
+        var player;
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 height: '360',
                 width: '640',
-                videoId: 'hxMNYkLN7tI',  // Replace with your desired YouTube video ID
+                videoId: 'YOUR_YOUTUBE_VIDEO_ID', // Replace with your YouTube video ID
                 events: {
                     'onStateChange': onPlayerStateChange
                 }
             });
         }
 
-        // Handle video state changes (e.g., pause and play)
+        // When the player state changes (i.e., video is paused)
         function onPlayerStateChange(event) {
             if (event.data == YT.PlayerState.PAUSED) {
                 questionBox.style.display = 'block';
-                avatar.style.display = 'block';  // Show avatar on pause
+                avatar.style.display = 'block'; // Show avatar when video is paused
             } else if (event.data == YT.PlayerState.PLAYING) {
                 questionBox.style.display = 'none';
-                avatar.style.display = 'none';  // Hide avatar when video plays
-                resetQandA();  // Reset question and answer when the video resumes
+                avatar.style.display = 'none'; // Hide avatar when video is playing
             }
         }
 
-        // Reset the question and answer fields
-        function resetQandA() {
-            document.getElementById('question').value = '';
-            responseBox.innerHTML = '';
-        }
-
-        // Ask a question and get a response from OpenAI (using an API backend)
+        // Function to send the question to Flask backend and receive the response
         function askQuestion() {
             var question = document.getElementById('question').value;
 
@@ -96,10 +96,7 @@
                 return;
             }
 
-            // Prevent the form from submitting the traditional way
-            event.preventDefault();
-
-            // Send the question to your API and handle the response
+            // Send the question to Flask via an AJAX POST request
             fetch('http://127.0.0.1:5000/ask', {
                 method: 'POST',
                 headers: {
@@ -109,6 +106,7 @@
             })
             .then(response => response.json())
             .then(data => {
+                // Display the response from the backend
                 if (data.answer) {
                     document.getElementById('response').innerText = "Answer: " + data.answer;
                 } else if (data.error) {
@@ -120,33 +118,6 @@
                 document.getElementById('response').innerText = "Error communicating with the backend.";
             });
         }
-
-        // Fullscreen mode handling
-        player.addEventListener('fullscreenchange', function() {
-            if (document.fullscreenElement) {
-                avatar.style.display = 'block';  // Ensure avatar is visible in fullscreen
-            } else {
-                avatar.style.display = 'none';  // Hide avatar when exiting fullscreen
-            }
-        });
-
-        player.addEventListener('webkitfullscreenchange', function() {
-            if (document.webkitFullscreenElement) {
-                avatar.style.display = 'block';
-            } else {
-                avatar.style.display = 'none';
-            }
-        });
-
-        player.addEventListener('mozfullscreenchange', function() {
-            if (document.mozFullScreenElement) {
-                avatar.style.display = 'block';
-            } else {
-                avatar.style.display = 'none';
-            }
-        });
-
-        window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
     </script>
 </body>
 </html>

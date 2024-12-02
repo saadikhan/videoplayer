@@ -62,18 +62,33 @@
         var questionBox = document.getElementById('question-box');
         var responseBox = document.getElementById('response');
 
-        // Show avatar and question box when the video is paused
-        video.addEventListener('pause', function() {
-            questionBox.style.display = 'block';
-            avatar.style.display = 'block';  // Show avatar on pause
-        });
+        // Function to handle player state
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PAUSED) {
+                questionBox.style.display = 'block';
+                avatar.style.display = 'block';  // Show avatar on pause
+            } else if (event.data == YT.PlayerState.PLAYING) {
+                questionBox.style.display = 'none';
+                avatar.style.display = 'none';  // Hide avatar when video plays
+                resetQandA();  // Reset question and answer when the video resumes
+            }
+        }
 
-        // Hide avatar and question box when the video is played
-        video.addEventListener('play', function() {
-            questionBox.style.display = 'none';
-            avatar.style.display = 'none';  // Hide avatar when video plays
-            resetQandA();  // Reset question and answer when the video resumes
-        });
+        // Initialize YouTube API and create player object
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-video', {
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        // Load YouTube Iframe API
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         // Function to reset Q&A box
         function resetQandA() {

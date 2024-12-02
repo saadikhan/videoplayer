@@ -5,54 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Video Player</title>
     <style>
-        #search-bar {
-            display: none;
-            position: fixed;
+        #video-container {
+            position: relative;
+        }
+
+        #avatar {
+            position: absolute;
             top: 10px;
             left: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 10px;
-            color: white;
-            border-radius: 5px;
-            z-index: 9999;
-        }
-        #search-input {
-            width: 250px;
-            padding: 8px;
-            font-size: 14px;
-        }
-        #search-btn {
-            padding: 8px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        #avatar {
-            position: fixed;
-            top: 10px;
-            right: 10px;
             width: 100px;
-            height: 100px;
-            z-index: 9999;
+            height: auto;
+            display: none; /* Hide avatar initially */
+        }
+
+        #question-box {
+            position: absolute;
+            top: 120px; /* Move the question box down */
+            left: 10px;
+            padding: 8px;
+            background-color: white;
+            border: 1px solid #ccc;
+            width: 250px;  /* Make the box smaller */
+            display: none; /* Hide question box initially */
+        }
+
+        #question {
+            width: 100%; /* Make the input field fill the question box */
+        }
+
+        #response {
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div id="avatar">
-        <img src="avatar.png" alt="Avatar">
-    </div>
-
-    <div id="player"></div>
-
-    <div id="search-bar">
-        <input type="text" id="search-input" placeholder="Ask something...">
-        <button id="search-btn">Search</button>
+    <div id="video-container">
+        <div id="player"></div>
+        <img src="avatar.png" alt="Avatar" id="avatar">
+        <div id="question-box">
+            <input type="text" id="question" placeholder="Ask a question..." />
+            <button onclick="askQuestion()">Submit</button>
+            <div id="response"></div>
+        </div>
     </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        let player;
-        let searchBar = document.getElementById('search-bar');
+        var player;
+        var avatar = document.getElementById('avatar');
+        var questionBox = document.getElementById('question-box');
+        var responseBox = document.getElementById('response');
 
+        // Initialize the YouTube player
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 height: '360',
@@ -64,20 +68,82 @@
             });
         }
 
+        // Handle video state changes (e.g., pause and play)
         function onPlayerStateChange(event) {
             if (event.data == YT.PlayerState.PAUSED) {
-                searchBar.style.display = 'block';
+                questionBox.style.display = 'block';
+                avatar.style.display = 'block';  // Show avatar on pause
             } else if (event.data == YT.PlayerState.PLAYING) {
-                searchBar.style.display = 'none';
+                questionBox.style.display = 'none';
+                avatar.style.display = 'none';  // Hide avatar when video plays
+                resetQandA();  // Reset question and answer when the video resumes
             }
         }
 
-        window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+        // Reset the question and answer fields
+        function resetQandA() {
+            document.getElementById('question').value = '';
+            responseBox.innerHTML = '';
+        }
 
-        document.getElementById('search-btn').addEventListener('click', function() {
-            const query = document.getElementById('search-input').value;
-            alert('You searched for: ' + query);  // Placeholder for actual search logic
+        // Ask a question and get a response from OpenAI (using an API backend)
+        function askQuestion() {
+            var question = document.getElementById('question').value;
+
+            // Check if the question is not empty
+            if (question.trim() === "") {
+                alert("Please enter a question.");
+                return;
+            }
+
+            // Send the question to your API and handle the response
+            fetch('http://127.0.0.1:5000/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ question: question })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.answer) {
+                    document.getElementById('response').innerText = "Answer: " + data.answer;
+                } else if (data.error) {
+                    document.getElementById('response').innerText = "Error: " + data.error;
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById('response').innerText = "Error communicating with the backend.";
+            });
+        }
+
+        // Fullscreen mode handling
+        player.addEventListener('fullscreenchange', function() {
+            if (document.fullscreenElement) {
+                avatar.style.display = 'block';  // Ensure avatar is visible in fullscreen
+            } else {
+                avatar.style.display = 'none';  // Hide avatar when exiting fullscreen
+            }
         });
+
+        player.addEventListener('webkitfullscreenchange', function() {
+            if (document.webkitFullscreenElement) {
+                avatar.style.display = 'block';
+            } else {
+                avatar.style.display = 'none';
+            }
+        });
+
+        player.addEventListener('mozfullscreenchange', function() {
+            if (document.mozFullScreenElement) {
+                avatar.style.display = 'block';
+            } else {
+                avatar.style.display = 'none';
+            }
+        });
+
+        window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
     </script>
 </body>
 </html>

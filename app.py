@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Set your OpenAI API key securely (avoid hardcoding in production)
-openai.api_key = ''
+openai.api_key = 'your-openai-api-key'  # Replace with your actual OpenAI API key
 
 @app.route('/')
 def index():
@@ -24,9 +24,7 @@ def ask():
         # Query OpenAI API for the answer using gpt-3.5-turbo (recommended)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",  # Use the GPT-3.5 model
-            messages=[
-                {"role": "user", "content": question}
-            ]
+            messages=[{"role": "user", "content": question}]
         )
 
         answer = response['choices'][0]['message']['content'].strip()  # Extract the answer from the response

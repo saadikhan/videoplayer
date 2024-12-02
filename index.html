@@ -3,46 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive YouTube Video Player</title>
+    <title>Interactive Video Player</title>
     <style>
         #video-container {
             position: relative;
-            width: 100%;
-            max-width: 640px; /* Adjust based on your preference */
-            margin: auto;
         }
 
         #avatar {
-            position: fixed;
-            top: 10px;
+            position: absolute;
+            top: 0px; /* Avatar at the top-left */
             left: 10px;
             width: 100px;
-            display: none; /* Hidden initially */
+            height: auto;
+            display: none; /* Hide avatar initially */
         }
 
         #question-box {
-            position: fixed;
+            position: absolute;
             top: 100px; /* Move the question box down */
             left: 10px;
             padding: 8px;
             background-color: white;
             border: 1px solid #ccc;
-            width: 250px;
-            display: none; /* Hidden initially */
+            width: 250px;  /* Make the box smaller */
+            display: none; /* Hide question box initially */
         }
 
         #question {
-            width: 100%;
+            width: 100%; /* Make the input field fill the question box */
         }
 
         #response {
             margin-top: 10px;
         }
+
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
     </style>
 </head>
 <body>
     <div id="video-container">
-        <div id="player"></div> <!-- YouTube Video player will be embedded here -->
+        <!-- Embed YouTube Video -->
+        <iframe id="youtube-video" src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
         <img src="avatar.png" alt="Avatar" id="avatar">
         <div id="question-box">
             <input type="text" id="question" placeholder="Ask a question..." />
@@ -52,38 +57,28 @@
     </div>
 
     <script>
+        var video = document.getElementById('youtube-video');
         var avatar = document.getElementById('avatar');
         var questionBox = document.getElementById('question-box');
         var responseBox = document.getElementById('response');
-        
-        // Load the YouTube Iframe API
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        // Create the YouTube player once the API is ready
-        var player;
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '360',
-                width: '640',
-                videoId: 'YOUR_YOUTUBE_VIDEO_ID', // Replace with your YouTube video ID
-                events: {
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
+        // Show avatar and question box when the video is paused
+        video.addEventListener('pause', function() {
+            questionBox.style.display = 'block';
+            avatar.style.display = 'block';  // Show avatar on pause
+        });
 
-        // When the player state changes (i.e., video is paused)
-        function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.PAUSED) {
-                questionBox.style.display = 'block';
-                avatar.style.display = 'block'; // Show avatar when video is paused
-            } else if (event.data == YT.PlayerState.PLAYING) {
-                questionBox.style.display = 'none';
-                avatar.style.display = 'none'; // Hide avatar when video is playing
-            }
+        // Hide avatar and question box when the video is played
+        video.addEventListener('play', function() {
+            questionBox.style.display = 'none';
+            avatar.style.display = 'none';  // Hide avatar when video plays
+            resetQandA();  // Reset question and answer when the video resumes
+        });
+
+        // Function to reset Q&A box
+        function resetQandA() {
+            document.getElementById('question').value = '';
+            responseBox.innerHTML = '';
         }
 
         // Function to send the question to Flask backend and receive the response
@@ -97,7 +92,7 @@
             }
 
             // Send the question to Flask via an AJAX POST request
-            fetch('http://127.0.0.1:5000/ask', {
+            fetch('/ask', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

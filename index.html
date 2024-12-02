@@ -11,8 +11,8 @@
 
         #avatar {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 10px;  /* Adjusted to fit within the screen */
+            left: 10px; /* Ensured avatar stays within bounds */
             width: 100px;
             height: auto;
             display: none; /* Hide avatar initially */
@@ -25,7 +25,7 @@
             padding: 8px;
             background-color: white;
             border: 1px solid #ccc;
-            width: 250px;  /* Make the box smaller */
+            width: 250px;
             display: none; /* Hide question box initially */
         }
 
@@ -95,6 +95,9 @@
                 alert("Please enter a question.");
                 return;
             }
+
+            // Prevent the form from submitting the traditional way
+            event.preventDefault();
 
             // Send the question to your API and handle the response
             fetch('http://127.0.0.1:5000/ask', {

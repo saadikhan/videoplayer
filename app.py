@@ -4,8 +4,8 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 
-# Allow CORS for GitHub Pages URL and YouTube domain
-CORS(app, origins=["https://yourfrontend.github.io", "https://www.youtube.com"])
+# Enable CORS for GitHub Pages and your repo hosting the video
+CORS(app, origins=["https://yourfrontend.github.io"])  # Replace with actual URL
 
 # Set your OpenAI API key securely (avoid hardcoding in production)
 openai.api_key = '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'  # Replace with your actual OpenAI API key

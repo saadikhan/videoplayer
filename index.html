@@ -37,17 +37,19 @@
             margin-top: 10px;
         }
 
-        iframe {
+        video {
             width: 100%;
-            height: 500px;
-            border: none;
+            height: auto;
         }
     </style>
 </head>
 <body>
     <div id="video-container">
-        <!-- Embed YouTube Video -->
-        <iframe id="youtube-video" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&enablejsapi=1" allowfullscreen></iframe>
+        <!-- Video hosted on GitHub repository -->
+        <video id="video" controls>
+            <source src="output_video.mp4" type="video/mp4"> <!-- Reference to the video hosted in the repo -->
+            Your browser does not support the video tag.
+        </video>
         <img src="avatar.png" alt="Avatar" id="avatar">
         <div id="question-box">
             <input type="text" id="question" placeholder="Ask a question..." />
@@ -57,38 +59,22 @@
     </div>
 
     <script>
-        var video = document.getElementById('youtube-video');
+        var video = document.getElementById('video');
         var avatar = document.getElementById('avatar');
         var questionBox = document.getElementById('question-box');
         var responseBox = document.getElementById('response');
 
-        // Function to handle player state
-        function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.PAUSED) {
-                questionBox.style.display = 'block';
-                avatar.style.display = 'block';  // Show avatar on pause
-            } else if (event.data == YT.PlayerState.PLAYING) {
-                questionBox.style.display = 'none';
-                avatar.style.display = 'none';  // Hide avatar when video plays
-                resetQandA();  // Reset question and answer when the video resumes
-            }
-        }
+        // Function to handle video state
+        video.addEventListener('pause', function() {
+            questionBox.style.display = 'block';
+            avatar.style.display = 'block';  // Show avatar on pause
+        });
 
-        // Initialize YouTube API and create player object
-        var player;
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('youtube-video', {
-                events: {
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
-
-        // Load YouTube Iframe API
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        video.addEventListener('play', function() {
+            questionBox.style.display = 'none';
+            avatar.style.display = 'none';  // Hide avatar when video plays
+            resetQandA();  // Reset question and answer when the video resumes
+        });
 
         // Function to reset Q&A box
         function resetQandA() {

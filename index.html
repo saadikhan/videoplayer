@@ -11,49 +11,40 @@
 
         #avatar {
             position: absolute;
-            top: 10px;
+            top: 0px; /* Avatar at the top-left */
             left: 10px;
             width: 100px;
             height: auto;
-            display: none;
+            display: none; /* Hide avatar initially */
         }
 
         #question-box {
             position: absolute;
-            top: 100px;
+            top: 100px; /* Move the question box down */
             left: 10px;
             padding: 8px;
             background-color: white;
             border: 1px solid #ccc;
-            width: 250px;
-            display: none;
+            width: 250px;  /* Make the box smaller */
+            display: none; /* Hide question box initially */
         }
 
         #question {
-            width: 100%;
+            width: 100%; /* Make the input field fill the question box */
         }
 
         #response {
             margin-top: 10px;
         }
-
-        video {
-            width: 100%;
-            height: auto;
-            border: none;
-        }
     </style>
 </head>
 <body>
     <div id="video-container">
-        <!-- Display video from the local directory -->
-        <video id="video" controls>
+        <video id="video" width="640" controls>
             <source src="output_video.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
-        
         <img src="avatar.png" alt="Avatar" id="avatar">
-        
         <div id="question-box">
             <input type="text" id="question" placeholder="Ask a question..." />
             <button onclick="askQuestion()">Submit</button>
@@ -67,20 +58,20 @@
         var questionBox = document.getElementById('question-box');
         var responseBox = document.getElementById('response');
 
-        // Show avatar and question box when video is paused
-        video.addEventListener('pause', function() {
+        // Show avatar and question box when the video is paused
+        video.onpause = function() {
             questionBox.style.display = 'block';
             avatar.style.display = 'block';  // Show avatar on pause
-        });
+        };
 
-        // Hide avatar and question box when video is playing
-        video.addEventListener('play', function() {
+        // Hide avatar and question box when the video is played
+        video.onplay = function() {
             questionBox.style.display = 'none';
             avatar.style.display = 'none';  // Hide avatar when video plays
             resetQandA();  // Reset question and answer when the video resumes
-        });
+        };
 
-        // Function to reset the Q&A box
+        // Function to reset Q&A box
         function resetQandA() {
             document.getElementById('question').value = '';
             responseBox.innerHTML = '';
@@ -97,7 +88,7 @@
             }
 
             // Send the question to Flask via an AJAX POST request
-            fetch('/ask', {
+            fetch('http://127.0.0.1:5000/ask', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -118,6 +109,31 @@
                 document.getElementById('response').innerText = "Error communicating with the backend.";
             });
         }
+
+        // Fullscreen mode handling
+        video.addEventListener('fullscreenchange', function() {
+            if (document.fullscreenElement) {
+                avatar.style.display = 'block';  // Ensure avatar is visible in fullscreen
+            } else {
+                avatar.style.display = 'none';  // Hide avatar when exiting fullscreen
+            }
+        });
+
+        video.addEventListener('webkitfullscreenchange', function() {
+            if (document.webkitFullscreenElement) {
+                avatar.style.display = 'block'; // Ensure avatar is visible
+            } else {
+                avatar.style.display = 'none';
+            }
+        });
+
+        video.addEventListener('mozfullscreenchange', function() {
+            if (document.mozFullScreenElement) {
+                avatar.style.display = 'block';
+            } else {
+                avatar.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>

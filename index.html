@@ -40,17 +40,20 @@
         video {
             width: 100%;
             height: auto;
+            border: none;
         }
     </style>
 </head>
 <body>
     <div id="video-container">
-        <!-- Video hosted on GitHub repository -->
+        <!-- Display video from the local directory -->
         <video id="video" controls>
-            <source src="output_video.mp4" type="video/mp4"> <!-- Reference to the video hosted in the repo -->
+            <source src="output_video.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
+        
         <img src="avatar.png" alt="Avatar" id="avatar">
+        
         <div id="question-box">
             <input type="text" id="question" placeholder="Ask a question..." />
             <button onclick="askQuestion()">Submit</button>
@@ -64,19 +67,20 @@
         var questionBox = document.getElementById('question-box');
         var responseBox = document.getElementById('response');
 
-        // Function to handle video state
+        // Show avatar and question box when video is paused
         video.addEventListener('pause', function() {
             questionBox.style.display = 'block';
             avatar.style.display = 'block';  // Show avatar on pause
         });
 
+        // Hide avatar and question box when video is playing
         video.addEventListener('play', function() {
             questionBox.style.display = 'none';
             avatar.style.display = 'none';  // Hide avatar when video plays
             resetQandA();  // Reset question and answer when the video resumes
         });
 
-        // Function to reset Q&A box
+        // Function to reset the Q&A box
         function resetQandA() {
             document.getElementById('question').value = '';
             responseBox.innerHTML = '';
